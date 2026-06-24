@@ -118,6 +118,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
   fetchState: async (userId: string) => {
     set({ isLoading: true });
     const { data, error } = await supabase.from('user_stats').select('*').eq('user_id', userId).maybeSingle();
+    if (error) alert('Select Error: ' + error.message);
     
     if (data) {
       set({
