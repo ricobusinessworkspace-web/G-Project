@@ -133,7 +133,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
         userName: data.name,
       });
     } else {
-      await supabase.from('user_stats').insert({
+      const { error: insertErr } = await supabase.from('user_stats').insert({
         user_id: userId,
         my_points: 5,
         my_debt: 0,
@@ -141,6 +141,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
         my_total_debt: 0,
         unpaid_weekly_debt: 0
       });
+      if (insertErr) alert('Insert Error: ' + insertErr.message);
       set({
          myPoints: 5,
          myDebt: 0,
@@ -357,7 +358,8 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
 
     if (Object.keys(updates).length > 0) {
       set({ ...localUpdates });
-      await supabase.from('user_stats').update(updates).eq('user_id', state.userId);
+      const { error } = await supabase.from('user_stats').update(updates).eq('user_id', state.userId);
+      if (error) alert('Settlement Update Error: ' + error.message);
     }
   },
 
@@ -397,10 +399,11 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
 
     const newPoints = get().myPoints + sleepTax; 
     
-    await supabase.from('user_stats').update({
+    const { error: updateErr } = await supabase.from('user_stats').update({
       my_points: newPoints,
       last_gm_date: todayStr,
     }).eq('user_id', state.userId);
+    if (updateErr) alert('GM Update Error: ' + updateErr.message);
 
     set({
       myPoints: newPoints,
@@ -471,11 +474,12 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
       debt_applied: debtToApply,
     });
 
-    await supabase.from('user_stats').update({
+    const { error: actionErr } = await supabase.from('user_stats').update({
       my_points: get().myPoints,
       my_debt: get().myDebt,
       my_weekly_debt: get().myWeeklyDebt,
     }).eq('user_id', state.userId);
+    if (actionErr) alert('Action Update Error: ' + actionErr.message);
   },
   
   undoAction: async (actionId: string) => {
