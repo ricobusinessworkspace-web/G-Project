@@ -6,15 +6,15 @@ const supabaseAnonKey = 'sb_publishable_Gpi4HY06nTHDDA4BRyjmsQ_V1pWxt1I';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function check() {
-  console.log("Checking Supabase connection...");
-  
-  const { data, error } = await supabase.from('user_stats').select('*').limit(1);
-  
-  if (error) {
-    console.error("Error reading user_stats:", error);
-  } else {
-    console.log("user_stats schema looks okay, data:", data);
-  }
+  const { data, error } = await supabase.from('action_entries').insert({
+    user_id: '3a134b90-f077-4e6f-ba7f-f2f9d6c50f29',
+    rule_id: '00000000-0000-0000-0000-000000000000',
+    timestamp: Date.now(),
+    points_applied: 5,
+    debt_applied: 0,
+    is_cancelled: false
+  }).select();
+  console.log("Insert result:", { data, error });
 }
 
 check();

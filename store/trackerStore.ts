@@ -167,9 +167,11 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
     const now = new Date();
     const startOfLogicalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(); 
     
-    const { data: actionsData } = await supabase.from('action_entries')
+    const { data: actionsData, error: actionsError } = await supabase.from('action_entries')
       .select('*')
       .gte('timestamp', startOfLogicalDay);
+      
+    if (actionsError) alert('Fetch Actions Error: ' + actionsError.message);
       
     if (actionsData) {
       set({
@@ -467,13 +469,14 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
       actionEntries: [...get().actionEntries, newEntry],
     });
 
-    await supabase.from('action_entries').insert({
+    const { error: insertActionErr } = await supabase.from('action_entries').insert({
       user_id: state.userId,
       rule_id: rule.id,
       timestamp: timestamp,
       points_applied: pointsToApply,
       debt_applied: debtToApply,
     });
+    if (insertActionErr) alert('Insert Action Error: ' + insertActionErr.message);
 
     const { error: actionErr } = await supabase.from('user_stats').update({
       my_points: get().myPoints,
